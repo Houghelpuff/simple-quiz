@@ -73,6 +73,37 @@ func printScoreboard(scores [][]string) {
 	fmt.Println("--------------------------------------------------")
 }
 
+func startQuiz(fileName string) {
+	fileExist := doesFileExist(fileName)
+
+	if(fileExist) {
+		file, err := os.Open(fileName)
+		if(err != nil) {
+			log.Fatal(err)
+		}
+		defer file.Close()
+
+		scanner := bufio.NewScanner(file)
+		scores := make([][]string, 0, 10)
+
+		// Read the file into the array
+		for(scanner.Scan()) {
+			line := strings.Split(scanner.Text(), ": ")
+			scores = append(scores, line)
+		}
+
+		file.Close()
+
+		sortList(scores, 0, len(scores)-1)
+		printScoreboard(scores)
+
+
+	} else {
+		fmt.Println("Uh oh, there is no scoreboard! You're the first player!")
+	}
+	
+}
+
 func main() {
 
 	if(len(os.Args) < 2) {
@@ -80,33 +111,6 @@ func main() {
 		return
 	} else {
 		fName := os.Args[1]
-
-		fileExist := doesFileExist(fName)
-
-		if(fileExist) {
-			file, err := os.Open(fName)
-			if(err != nil) {
-				log.Fatal(err)
-			}
-			defer file.Close()
-
-			scanner := bufio.NewScanner(file)
-			scores := make([][]string, 0, 10)
-
-			// Read the file into the array
-			for(scanner.Scan()) {
-				line := strings.Split(scanner.Text(), ": ")
-				scores = append(scores, line)
-			}
-
-			file.Close()
-
-			sortList(scores, 0, len(scores)-1)
-			printScoreboard(scores)
-
-
-		} else {
-			fmt.Println("Uh oh, there is no scoreboard! You're the first player!")
-		}
+		startQuiz(fName)
 	}
 }
