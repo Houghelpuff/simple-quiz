@@ -2,3 +2,4 @@ Peter Cottontail: 50
 Easter Bunny: 75
 Santa Claus: 10
 Tooth Fairy: 110
+Sasquatch: 300

@@ -56,6 +56,22 @@ func sortList(scores [][]string, start, end int) {
 	sortList(scores, splitIdx+1, end)
 }
 
+func reverseList(scores [][]string) [][]string {
+	for i,j := 0, len(scores)-1; i < j; i,j = i+1, j-1 {
+		scores[i], scores[j] = scores[j], scores[i]
+	} 
+	return scores
+}
+
+func printScoreboard(scores [][]string) {
+	fmt.Println("SCOREBOARD\n--------------------------------------------------")
+	scores = reverseList(scores)
+		for i := 0; i < len(scores); i++ {
+			fmt.Printf("%d. %s ----> %s\n", i+1, scores[i][0], scores[i][1])
+		}
+	fmt.Println("--------------------------------------------------")
+}
+
 func main() {
 
 	if(len(os.Args) < 2) {
@@ -82,11 +98,12 @@ func main() {
 				scores = append(scores, line)
 			}
 
-			sortList(scores, 0, len(scores)-1)
+			file.Close()
 
-			for i := 0; i < len(scores); i++ {
-				fmt.Printf("%d: %s\n", i+1, scores[i])
-			}
+			sortList(scores, 0, len(scores)-1)
+			printScoreboard(scores)
+
+
 		} else {
 			fmt.Println("Uh oh, there is no scoreboard! You're the first player!")
 		}
