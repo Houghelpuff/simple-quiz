@@ -6,7 +6,6 @@ import (
 	"bufio"
 	"log"
 	"strings"
-	// "sort"
 	"strconv"
 )
 
@@ -19,7 +18,9 @@ func doesFileExist(fName string) bool {
 		return false
 	}
 }
-
+/*
+	Adapted from https://medium.com/@rgalus/sorting-algorithms-quick-sort-implementation-in-go-9ebfd91fe95f
+*/
 func sortList(scores [][]string, start, end int) {
 	if (end - start) < 1 {
 		return
