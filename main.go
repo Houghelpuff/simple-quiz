@@ -20,12 +20,40 @@ func doesFileExist(fName string) bool {
 	}
 }
 
-func sortLists(scores []int, names []string) {
-	scoresPivot := scores[len(scores) - 1]
-	namesPivot := names[len(scores) - 1]
+func sortList(scores [][]string, start, end int) {
+	if (end - start) < 1 {
+		return
+	}
 
-	fmt.Println("End of scores:", scoresPivot)
-	fmt.Println("End of names:", namesPivot)
+	pivot := scores[end]
+	splitIdx := start
+
+	for i := start; i < end; i++ {
+		// fmt.Println(strconv.Atoi(pivot[1]))
+
+		intPivot, err := strconv.Atoi(pivot[1])
+		intScore, err := strconv.Atoi(scores[i][1])
+
+		if err != nil {
+			fmt.Println("Can't turn string into int...")
+			return
+		}
+
+		if intScore < intPivot {
+			temp := scores[splitIdx]
+
+			scores[splitIdx] = scores[i]
+			scores[i] = temp
+
+			splitIdx++
+		}
+	}
+
+	scores[end] = scores[splitIdx]
+	scores[splitIdx] = pivot
+
+	sortList(scores, start, splitIdx-1)
+	sortList(scores, splitIdx+1, end)
 }
 
 func main() {
@@ -46,54 +74,21 @@ func main() {
 			defer file.Close()
 
 			scanner := bufio.NewScanner(file)
-			names := make([]string, 0, 10)
-			scores := make([]int, 0, 10)
+			scores := make([][]string, 0, 10)
+
+			// Read the file into the array
 			for(scanner.Scan()) {
-				splits := strings.Split(scanner.Text(), ": ")
-				// splits[1] give the score on each line
-				names = append(names, splits[0])
-				intScore, err := strconv.Atoi(splits[1])
-				if(err != nil) {
-					fmt.Printf("Could not convert string to int: %s", err)
-					return
-				} else {
-					scores = append(scores, intScore)
-				}
+				line := strings.Split(scanner.Text(), ": ")
+				scores = append(scores, line)
 			}
 
-			for i := 0; i < len(names); i++ {
-				fmt.Printf("%d. %s %d\n", i+1, names[i], scores[i])
-			}
+			sortList(scores, 0, len(scores)-1)
 
-			sortLists(scores, names)
+			for i := 0; i < len(scores); i++ {
+				fmt.Printf("%d: %s\n", i+1, scores[i])
+			}
 		} else {
-			fmt.Println("There is no scoreboard! You're the first player!")
+			fmt.Println("Uh oh, there is no scoreboard! You're the first player!")
 		}
 	}
-
-	// var firstName, lastName string
-	
-	// fmt.Println("Please input your first name:")
-	// fmt.Scanln(&firstName)
-	
-	// fmt.Println("Please enter your last name:")
-	// fmt.Scanln(&lastName)
-
-	// fullName := firstName + " " + lastName
-	
-	// l, error := f.WriteString(fullName)
-	// if(error != nil) {
-	// 	fmt.Println(error)
-	// 	f.Close()
-	// 	return
-	// }
-
-	// fmt.Println(l, "bytes written successfully")
-	// error = f.Close()
-	// if(error != nil) {
-	// 	fmt.Println(error)
-	// 	fmt.Println("File could not close")
-	// 	return
-	// }
-
 }
