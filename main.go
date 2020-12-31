@@ -64,44 +64,50 @@ func reverseList(scores [][]string) [][]string {
 	return scores
 }
 
-func printScoreboard(scores [][]string) {
-	fmt.Println("SCOREBOARD\n--------------------------------------------------")
-	scores = reverseList(scores)
-		for i := 0; i < len(scores); i++ {
-			fmt.Printf("%d. %s ----> %s\n", i+1, scores[i][0], scores[i][1])
-		}
-	fmt.Println("--------------------------------------------------")
-}
-
-func startQuiz(fileName string) {
+func printScoreboard(fileName string) {
+	
 	fileExist := doesFileExist(fileName)
-
+	scores := make([][]string, 0, 10)
+	
 	if(fileExist) {
 		file, err := os.Open(fileName)
 		if(err != nil) {
 			log.Fatal(err)
 		}
 		defer file.Close()
-
+		
 		scanner := bufio.NewScanner(file)
-		scores := make([][]string, 0, 10)
-
 		// Read the file into the array
 		for(scanner.Scan()) {
 			line := strings.Split(scanner.Text(), ": ")
 			scores = append(scores, line)
 		}
-
+		
 		file.Close()
-
-		sortList(scores, 0, len(scores)-1)
-		printScoreboard(scores)
-
-
-	} else {
-		fmt.Println("Uh oh, there is no scoreboard! You're the first player!")
 	}
-	
+
+	sortList(scores, 0, len(scores)-1)
+
+	fmt.Printf("SCOREBOARD\n--------------------------------------------------")
+	scores = reverseList(scores)
+	for i := 0; i < len(scores); i++ {
+		fmt.Printf("%d. %s ----> %s\n", i+1, scores[i][0], scores[i][1])
+	}
+	fmt.Printf("--------------------------------------------------")
+}
+
+func startQuiz(fileName string) {
+	var choice string
+	for ;; {
+		fmt.Printf("Please choose an option:\n1. Start quiz\n2. See scoreboard\n3. Add a question\n4. Quit\n")
+		fmt.Scanln(&choice)
+		if(choice == "2") {
+			printScoreboard(fileName)
+		} else if(choice == "4") {
+			fmt.Printf("Thanks for playing!\n")
+			break
+		}
+	}
 }
 
 func main() {
