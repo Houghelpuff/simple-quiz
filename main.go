@@ -7,7 +7,20 @@ import (
 	"log"
 	"strings"
 	"strconv"
+	"net/http"
+	"io/ioutil"
+	"time"
+	"encoding/json"
 )
+
+type Question struct {
+	Category					string
+	Type							string
+	Difficulty				string
+	Question 					string
+	Correct_Answers 	[]string
+	Incorrect_Answers []string
+}
 
 func doesFileExist(fName string) bool {
 	if _, err := os.Stat(fName); err == nil {
@@ -119,4 +132,40 @@ func main() {
 		fName := os.Args[1]
 		startQuiz(fName)
 	}
+
+	/*
+		API: https://opentdb.com/api_config.php
+	*/
+	url := "https://opentdb.com/api.php?amount=10&type=multiple"
+	client := http.Client{
+		Timeout: time.Second * 2,
+	}
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	res, getErr := client.Do(req)
+	if(getErr != nil) {
+		log.Fatal(getErr)
+	}
+	if(res.Body != nil) {
+		defer res.Body.Close()
+	}
+
+	body, readErr := ioutil.ReadAll(res.Body)
+	if(readErr != nil) {
+		log.Fatal(readErr)
+	}
+
+	questions := make([]Question, 0)
+	err = json.Unmarshal([]byte(string(body)), &questions)
+
+	if err == nil {
+		fmt.Printf("%+v\n", questions)
+	} else {
+		fmt.Printf("%s\n", err)
+	}
+
+	fmt.Printf("%s\n", string(body))
 }
