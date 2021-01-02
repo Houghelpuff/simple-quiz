@@ -13,6 +13,9 @@ import (
 	"encoding/json"
 )
 
+/*
+	Struct to hold all the different parts of the question
+*/
 type jsonObj struct {
 	Rescode 						int `json:"response_code"`
 	Question []struct {
@@ -25,6 +28,9 @@ type jsonObj struct {
 	} `json:"results"`
 }
 
+/* 
+	Function to check if the file for the scoreboard exists in user's directory
+*/
 func doesFileExist(fName string) bool {
 	if _, err := os.Stat(fName); err == nil {
 		return true
@@ -73,6 +79,10 @@ func sortList(scores [][]string, start, end int) {
 	sortList(scores, splitIdx+1, end)
 }
 
+
+/*
+	Function that takes in a list and reverses it
+*/
 func reverseList(scores [][]string) [][]string {
 	for i,j := 0, len(scores)-1; i < j; i,j = i+1, j-1 {
 		scores[i], scores[j] = scores[j], scores[i]
@@ -80,8 +90,10 @@ func reverseList(scores [][]string) [][]string {
 	return scores
 }
 
-func printScoreboard(fileName string) {
-	
+/*
+	Function that takes the fileName in as a string and returns the list of lists that contains the names and scores from the scoreboard
+*/
+func loadScoreboard(fileName string) [][]string {
 	fileExist := doesFileExist(fileName)
 	scores := make([][]string, 0, 10)
 	
@@ -102,14 +114,21 @@ func printScoreboard(fileName string) {
 		file.Close()
 	}
 
+	return scores
+}
+
+/*
+	Function that prints the scoreboard
+*/
+func printScoreboard(scores [][]string) {
 	sortList(scores, 0, len(scores)-1)
 
-	fmt.Printf("SCOREBOARD\n--------------------------------------------------")
+	fmt.Printf("SCOREBOARD\n--------------------------------------------------\n")
 	scores = reverseList(scores)
 	for i := 0; i < len(scores); i++ {
 		fmt.Printf("%d. %s ----> %s\n", i+1, scores[i][0], scores[i][1])
 	}
-	fmt.Printf("--------------------------------------------------")
+	fmt.Printf("--------------------------------------------------\n")
 }
 
 func displayQuestions(questions jsonObj) {
@@ -118,6 +137,9 @@ func displayQuestions(questions jsonObj) {
 	}
 }
 
+/*
+	Function that loads the data from the api call into the struct
+*/
 func loadData() jsonObj {
 	/*
 		API: https://opentdb.com/api_config.php
@@ -166,7 +188,8 @@ func startQuiz(fileName string, questions jsonObj) {
 		if(choice == "1") {
 			displayQuestions(questions)
 		} else if(choice == "2") {
-			printScoreboard(fileName)
+			scores := loadScoreboard(fileName)
+			printScoreboard(scores)
 		} else if(choice == "4") {
 			fmt.Printf("Thanks for playing!\n")
 			break
