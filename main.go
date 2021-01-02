@@ -13,13 +13,16 @@ import (
 	"encoding/json"
 )
 
-type Question struct {
-	Category					string
-	Type							string
-	Difficulty				string
-	Question 					string
-	Correct_Answers 	[]string
-	Incorrect_Answers []string
+type jsonObj struct {
+	Rescode 						int `json:"response_code"`
+	Question []struct {
+		Category					string `json:"category"`
+		Type							string `json:"type"`
+		Difficulty				string `json:"difficulty"`
+		Question 					string `json:"question"`
+		Correct_Answers 	string `json:"correct_answer"`
+		Incorrect_Answers []string `json:"incorrect_answers"`
+	} `json:"results"`
 }
 
 func doesFileExist(fName string) bool {
@@ -109,30 +112,13 @@ func printScoreboard(fileName string) {
 	fmt.Printf("--------------------------------------------------")
 }
 
-func startQuiz(fileName string) {
-	var choice string
-	for ;; {
-		fmt.Printf("Please choose an option:\n1. Start quiz\n2. See scoreboard\n3. Add a question\n4. Quit\n")
-		fmt.Scanln(&choice)
-		if(choice == "2") {
-			printScoreboard(fileName)
-		} else if(choice == "4") {
-			fmt.Printf("Thanks for playing!\n")
-			break
-		}
+func displayQuestions(questions jsonObj) {
+	for i := 0; i < len(questions.Question); i++ {
+		fmt.Printf("%s\n", questions.Question[i].Question)
 	}
 }
 
-func main() {
-
-	if(len(os.Args) < 2) {
-		fmt.Printf("Usage: %s <filename>\n", os.Args[0])
-		return
-	} else {
-		fName := os.Args[1]
-		startQuiz(fName)
-	}
-
+func loadData() jsonObj {
 	/*
 		API: https://opentdb.com/api_config.php
 	*/
@@ -158,14 +144,44 @@ func main() {
 		log.Fatal(readErr)
 	}
 
-	questions := make([]Question, 0)
-	err = json.Unmarshal([]byte(string(body)), &questions)
+	byteBody := []byte(body)
+
+	var questions jsonObj
+	err = json.Unmarshal(byteBody, &questions)
 
 	if err == nil {
-		fmt.Printf("%+v\n", questions)
+		fmt.Printf("Data loaded successfully!")
 	} else {
 		fmt.Printf("%s\n", err)
 	}
 
-	fmt.Printf("%s\n", string(body))
+	return questions
+}
+
+func startQuiz(fileName string, questions jsonObj) {
+	var choice string
+	for ;; {
+		fmt.Printf("Please choose an option:\n1. Start quiz\n2. See scoreboard\n3. Add a question\n4. Quit\n")
+		fmt.Scanln(&choice)
+		if(choice == "1") {
+			displayQuestions(questions)
+		} else if(choice == "2") {
+			printScoreboard(fileName)
+		} else if(choice == "4") {
+			fmt.Printf("Thanks for playing!\n")
+			break
+		}
+	}
+}
+
+func main() {
+	if(len(os.Args) < 2) {
+		fmt.Printf("Usage: %s <filename>\n", os.Args[0])
+		return
+	} else {
+		fName := os.Args[1]
+		var questions jsonObj
+		questions = loadData()
+		startQuiz(fName, questions)
+	}
 }
