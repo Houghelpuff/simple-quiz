@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"time"
 	"encoding/json"
+	"math/rand"
 )
 
 /*
@@ -79,7 +80,6 @@ func sortList(scores [][]string, start, end int) {
 	sortList(scores, splitIdx+1, end)
 }
 
-
 /*
 	Function that takes in a list and reverses it
 */
@@ -131,12 +131,6 @@ func printScoreboard(scores [][]string) {
 	fmt.Printf("--------------------------------------------------\n")
 }
 
-func displayQuestions(questions jsonObj) {
-	for i := 0; i < len(questions.Question); i++ {
-		fmt.Printf("%s\n", questions.Question[i].Question)
-	}
-}
-
 /*
 	Function that loads the data from the api call into the struct
 */
@@ -180,13 +174,75 @@ func loadData() jsonObj {
 	return questions
 }
 
+func giveTest(questions jsonObj) int {
+	// for i := 0; i < len(questions.Question); i++ {
+	// 	fmt.Printf("Question: %s\n", questions.Question[i].Question)
+	// 	for j := 0; j < 3; j++ {
+	// 		fmt.Printf("Incorrect Answers: %s\n", questions.Question[i].Incorrect_Answers[j])
+	// 	}
+	// }
+	score, rando := 0, 0
+	var choice string
+	for i := 0; i < len(questions.Question); i++ {
+		rando = rand.Intn(4)
+		switch rando {
+			case 0:
+				fmt.Printf("%s\n1. %s\n2. %s\n3. %s\n4. %s\n", questions.Question[i].Question, 
+				questions.Question[i].Correct_Answers, questions.Question[i].Incorrect_Answers[0], 
+				questions.Question[i].Incorrect_Answers[1], questions.Question[i].Incorrect_Answers[2])
+				fmt.Scanln(&choice)
+				if(choice == "1") {
+					score++
+					fmt.Printf("Correct! -----> Score: %d\n", score)
+				} else {
+					fmt.Printf("Oops! That's not the correct answer. The correct answer was %d. ----> Score: %d\n", rando+1, score)
+				}
+			case 1:
+				fmt.Printf("%s\n1. %s\n2. %s\n3. %s\n4. %s\n", questions.Question[i].Question, 
+				questions.Question[i].Incorrect_Answers[0], questions.Question[i].Correct_Answers, 
+				questions.Question[i].Incorrect_Answers[1], questions.Question[i].Incorrect_Answers[2])
+				fmt.Scanln(&choice)
+				if(choice == "2") {
+					score++
+					fmt.Printf("Correct! -----> Score: %d\n", score)
+				} else {
+					fmt.Printf("Oops! That's not the correct answer. The correct answer was %d. ----> Score: %d\n", rando+1, score)
+				}
+			case 2:
+				fmt.Printf("%s\n1. %s\n2. %s\n3. %s\n4. %s\n", questions.Question[i].Question, 
+				questions.Question[i].Incorrect_Answers[0], questions.Question[i].Incorrect_Answers[1], 
+				questions.Question[i].Correct_Answers, questions.Question[i].Incorrect_Answers[3])
+				fmt.Scanln(&choice)
+				if(choice == "3") {
+					score++
+					fmt.Printf("Correct! -----> Score: %d\n", score)
+				} else {
+					fmt.Printf("Oops! That's not the correct answer. The correct answer was %d. ----> Score: %d\n", rando+1, score)
+				}
+			case 3:
+				fmt.Printf("%s\n1. %s\n2. %s\n3. %s\n4. %s\n", questions.Question[i].Question, 
+				questions.Question[i].Incorrect_Answers[0], questions.Question[i].Incorrect_Answers[1], 
+				questions.Question[i].Incorrect_Answers[2], questions.Question[i].Correct_Answers)
+				fmt.Scanln(&choice)
+				if(choice == "4") {
+					score++
+					fmt.Printf("Correct! -----> Score: %d\n", score)
+				} else {
+					fmt.Printf("Oops! That's not the correct answer. The correct answer was %d. ----> Score: %d\n", rando+1, score)
+				}
+		}
+
+	}
+	return score
+}
+
 func startQuiz(fileName string, questions jsonObj) {
 	var choice string
 	for ;; {
 		fmt.Printf("Please choose an option:\n1. Start quiz\n2. See scoreboard\n3. Add a question\n4. Quit\n")
 		fmt.Scanln(&choice)
 		if(choice == "1") {
-			displayQuestions(questions)
+			giveTest(questions)
 		} else if(choice == "2") {
 			scores := loadScoreboard(fileName)
 			printScoreboard(scores)
