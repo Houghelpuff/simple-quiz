@@ -90,6 +90,15 @@ func reverseList(scores [][]string) [][]string {
 	return scores
 }
 
+func shuffleList(answers []string) []string {
+	for i := range answers {
+		j := rand.Intn(i + 1)
+		answers[i], answers[j] = answers[j], answers[i]
+	}
+
+	return answers
+}
+
 /*
 	Function that takes the fileName in as a string and returns the list of lists that contains the names and scores from the scoreboard
 */
@@ -175,63 +184,39 @@ func loadData() jsonObj {
 }
 
 func giveTest(questions jsonObj) int {
-	// for i := 0; i < len(questions.Question); i++ {
-	// 	fmt.Printf("Question: %s\n", questions.Question[i].Question)
-	// 	for j := 0; j < 3; j++ {
-	// 		fmt.Printf("Incorrect Answers: %s\n", questions.Question[i].Incorrect_Answers[j])
-	// 	}
-	// }
-	score, rando := 0, 0
-	var choice string
+	score := 0
+	var choice string 
+	allAnswers := make([]string, 4)
+	
 	for i := 0; i < len(questions.Question); i++ {
-		rando = rand.Intn(4)
-		switch rando {
-			case 0:
-				fmt.Printf("%s\n1. %s\n2. %s\n3. %s\n4. %s\n", questions.Question[i].Question, 
-				questions.Question[i].Correct_Answers, questions.Question[i].Incorrect_Answers[0], 
-				questions.Question[i].Incorrect_Answers[1], questions.Question[i].Incorrect_Answers[2])
-				fmt.Scanln(&choice)
-				if(choice == "1") {
-					score++
-					fmt.Printf("Correct! -----> Score: %d\n", score)
-				} else {
-					fmt.Printf("Oops! That's not the correct answer. The correct answer was %d. ----> Score: %d\n", rando+1, score)
-				}
-			case 1:
-				fmt.Printf("%s\n1. %s\n2. %s\n3. %s\n4. %s\n", questions.Question[i].Question, 
-				questions.Question[i].Incorrect_Answers[0], questions.Question[i].Correct_Answers, 
-				questions.Question[i].Incorrect_Answers[1], questions.Question[i].Incorrect_Answers[2])
-				fmt.Scanln(&choice)
-				if(choice == "2") {
-					score++
-					fmt.Printf("Correct! -----> Score: %d\n", score)
-				} else {
-					fmt.Printf("Oops! That's not the correct answer. The correct answer was %d. ----> Score: %d\n", rando+1, score)
-				}
-			case 2:
-				fmt.Printf("%s\n1. %s\n2. %s\n3. %s\n4. %s\n", questions.Question[i].Question, 
-				questions.Question[i].Incorrect_Answers[0], questions.Question[i].Incorrect_Answers[1], 
-				questions.Question[i].Correct_Answers, questions.Question[i].Incorrect_Answers[3])
-				fmt.Scanln(&choice)
-				if(choice == "3") {
-					score++
-					fmt.Printf("Correct! -----> Score: %d\n", score)
-				} else {
-					fmt.Printf("Oops! That's not the correct answer. The correct answer was %d. ----> Score: %d\n", rando+1, score)
-				}
-			case 3:
-				fmt.Printf("%s\n1. %s\n2. %s\n3. %s\n4. %s\n", questions.Question[i].Question, 
-				questions.Question[i].Incorrect_Answers[0], questions.Question[i].Incorrect_Answers[1], 
-				questions.Question[i].Incorrect_Answers[2], questions.Question[i].Correct_Answers)
-				fmt.Scanln(&choice)
-				if(choice == "4") {
-					score++
-					fmt.Printf("Correct! -----> Score: %d\n", score)
-				} else {
-					fmt.Printf("Oops! That's not the correct answer. The correct answer was %d. ----> Score: %d\n", rando+1, score)
-				}
+		allAnswers = nil
+		choice = ""
+		for j := 0; j < 3; j++ {
+			allAnswers = append(allAnswers, questions.Question[i].Incorrect_Answers[j])
 		}
+		allAnswers = append(allAnswers, questions.Question[i].Correct_Answers)
+		shuffledAnswers := shuffleList(allAnswers)
 
+		/*
+			Print the questions and the answers
+		*/
+		fmt.Printf("---------------------------------------\n")
+		fmt.Printf("(%d/10) %s\n", i+1, questions.Question[i].Question)
+		for j := 0; j < len(allAnswers); j++ {
+			fmt.Printf("%d. %s\n", j + 1, shuffledAnswers[j])
+		}
+		fmt.Scanln(&choice)
+		str_choice, err := strconv.Atoi(choice)
+		if err != nil {
+			fmt.Println("Can't turn string into int...")
+			return -1 
+		}
+		if(shuffledAnswers[str_choice - 1] == questions.Question[i].Correct_Answers) {
+			score++
+			fmt.Printf("Correct! ---> Socre: %d\n", score)
+		} else {
+			fmt.Printf("Incorrect. The correct answer was:\n%s\nScore: %d\n", questions.Question[i].Correct_Answers, score)
+		}
 	}
 	return score
 }
@@ -242,7 +227,18 @@ func startQuiz(fileName string, questions jsonObj) {
 		fmt.Printf("Please choose an option:\n1. Start quiz\n2. See scoreboard\n3. Add a question\n4. Quit\n")
 		fmt.Scanln(&choice)
 		if(choice == "1") {
-			giveTest(questions)
+			score := giveTest(questions)
+			switch score {
+				case 0, 1, 2, 3, 4:
+					fmt.Printf("Oof... a score of %d/10 is not that great. Try harder next time\n", score)
+				case 5, 6, 7, 8:
+					fmt.Printf("Not bad... not bad at all. Score: %d/10\n", score)
+				case 9:
+					fmt.Printf("Close but no cigar... Score: %d/10\n", score)
+				case 10:
+					fmt.Printf("Damn, you did it! %d/10!\n", score)
+			}
+			fmt.Printf("---------------------------------------\n")
 		} else if(choice == "2") {
 			scores := loadScoreboard(fileName)
 			printScoreboard(scores)
