@@ -95,7 +95,6 @@ func shuffleList(answers []string) []string {
 		j := rand.Intn(i + 1)
 		answers[i], answers[j] = answers[j], answers[i]
 	}
-
 	return answers
 }
 
@@ -105,24 +104,20 @@ func shuffleList(answers []string) []string {
 func loadScoreboard(fileName string) [][]string {
 	fileExist := doesFileExist(fileName)
 	scores := make([][]string, 0, 10)
-	
 	if(fileExist) {
 		file, err := os.Open(fileName)
 		if(err != nil) {
 			log.Fatal(err)
 		}
 		defer file.Close()
-		
 		scanner := bufio.NewScanner(file)
 		// Read the file into the array
 		for(scanner.Scan()) {
 			line := strings.Split(scanner.Text(), ": ")
 			scores = append(scores, line)
 		}
-		
 		file.Close()
 	}
-
 	return scores
 }
 
@@ -131,7 +126,6 @@ func loadScoreboard(fileName string) [][]string {
 */
 func printScoreboard(scores [][]string) {
 	sortList(scores, 0, len(scores)-1)
-
 	fmt.Printf("SCOREBOARD\n--------------------------------------------------\n")
 	scores = reverseList(scores)
 	for i := 0; i < len(scores); i++ {
@@ -168,9 +162,7 @@ func loadData() jsonObj {
 	if(readErr != nil) {
 		log.Fatal(readErr)
 	}
-
 	byteBody := []byte(body)
-
 	var questions jsonObj
 	err = json.Unmarshal(byteBody, &questions)
 
